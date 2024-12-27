@@ -1,252 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sudoku Solver</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ8v+8A6vT6vT/7I1pQ66nFddLRgQDhQ98gBOLcYpg5m2zBdX5HiXa6k8tPb" crossorigin="anonymous">
+    <title>Sudoku Çözücü</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
-            background: #f0f2f5;
-            font-family: 'Arial', sans-serif;
-            color: #333;
+            transition: background-color 0.3s ease;
+            min-height: 100vh;
         }
-
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #212529;
+            --bs-body-color: #f8f9fa;
+        }
         .container {
             max-width: 800px;
-            margin-top: 50px;
-            background-color: #ffffff;
-            padding: 30px;
+            padding: 2rem;
+        }
+        .upload-area {
             border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
         }
-
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-            font-size: 2.5rem;
+        #solution-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-
-        .sudoku-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            grid-template-rows: repeat(9, 1fr);
-            gap: 3px;
-            margin-bottom: 20px;
-        }
-        .sudoku-cell.white {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 20px;
-            background-color: #f9f9f9;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
-        }
-
-        .sudoku-cell.white input {
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            font-size: 18px;
-            border: none;
-            background-color: transparent;
-            outline: none;
-            color: #333;
-            font-weight: bold;
-            padding: 0;
-            transition: background-color 0.2s ease;
-        }
-
-        .sudoku-cell.white input:focus {
-            background-color: #e0f7fa;
-        }
-
-        .sudoku-cell.white input:disabled {
-            background-color: #ffffff;
-        }
-        .sudoku-cell.blue {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 20px;
-            background-color: #f9f9f9;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
-        }
-
-        .sudoku-cell.blue input {
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            font-size: 18px;
-            border: none;
-            background-color: transparent;
-            outline: none;
-            color: #333;
-            font-weight: bold;
-            padding: 0;
-            transition: background-color 0.2s ease;
-        }
-
-        .sudoku-cell.blue input:focus {
-            background-color: #e0f7fa;
-        }
-
-        .sudoku-cell.blue input:disabled {
-            background-color: #e0f7fa;
-        }
-
-        .sudoku-cell.white {
-            background-color: #ffffff;
-        }
-
-        .sudoku-cell.blue {
-            background-color: #e0f7fa;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.2rem;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #45a049;
-        }
-
-        .btn-block {
-            margin-top: 20px;
-        }
-
-        .alert {
+        .loading {
             display: none;
-            padding: 20px;
-            background-color: #e9f7df;
-            border-radius: 5px;
-            border-left: 5px solid #4CAF50;
-            color: #4CAF50;
-            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
         }
-
-        .alert pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
         }
-
-        .input-container {
-            margin-bottom: 20px;
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
-
-        .input-container input[type="file"] {
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            width: 100%;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
+        .drag-text {
+            text-align: center;
+            margin-bottom: 1rem;
         }
-
-        .input-container input[type="file"]:hover {
-            border-color: #4CAF50;
+        .card {
+            cursor: pointer;
+            transition: transform 0.2s;
         }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .sudoku-grid {
-                grid-template-columns: repeat(9, 1fr);
-                grid-template-rows: repeat(9, 1fr);
-            }
-
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .modal-img {
+            max-width: 100%;
+            height: auto;
+        }
+        .modal-dialog {
+            max-width: 90%;
+            margin: 1.75rem auto;
         }
     </style>
 </head>
 <body>
+    <div class="theme-switch">
+        <button class="btn btn-outline-primary" id="theme-toggle">
+            <i class="bi bi-moon-fill"></i>
+        </button>
+    </div>
+
     <div class="container">
-        <h1>Sudoku Solver</h1>
-
-        <!-- Sudoku Grid -->
-        <form id="sudokuForm" method="POST" action="/upload" enctype="multipart/form-data">
-            <div class="sudoku-grid">
-                <!-- 81 inputs for Sudoku cells with alternating colors for 3x3 grids -->
-                {% for i in range(9) %}
-                    {% for j in range(9) %}
-                        <div class="sudoku-cell {% if (i // 3 + j // 3) % 2 == 0 %}white{% else %}blue{% endif %}">
-                            <input type="text" id="cell_{{ i }}_{{ j }}" maxlength="1" oninput="validateInput(event)" />
+        <h1 class="text-center mb-4">Sudoku Çözücü</h1>
+        <div class="upload-area">
+            <form id="upload-form">
+                <div class="text-center mb-4">
+                    <i class="bi bi-image upload-icon"></i>
+                    <div class="drag-text">
+                        <h4>Sudoku Görüntüsünü Seçin veya Sürükleyin</h4>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="file" class="form-control form-control-lg" id="sudoku-image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-magic"></i> Çöz
+                </button>
+            </form>
+            <div class="loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-2">Sudoku çözülüyor...</p>
+            </div>
+        </div>
+        <div id="solution-container" style="display: none;">
+            <h3 class="text-center mb-4">İşlem Aşamaları</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-3" onclick="showImage('kareler-image', '1. Kareleri Bulma')">
+                        <div class="card-body">
+                            <h5 class="card-title">1. Kareleri Bulma</h5>
+                            <img id="kareler-image" src="" alt="Kareleri bulma aşaması" class="img-fluid rounded">
                         </div>
-                    {% endfor %}
-                {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-3" onclick="showImage('kenarlar-image', '2. Kenar Algılama')">
+                        <div class="card-body">
+                            <h5 class="card-title">2. Kenar Algılama</h5>
+                            <img id="kenarlar-image" src="" alt="Kenar algılama aşaması" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-3" onclick="showImage('solution-image', '3. Çözüm')">
+                        <div class="card-body">
+                            <h5 class="card-title">3. Çözüm</h5>
+                            <img id="solution-image" src="" alt="Sudoku çözümü" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="input-container">
-                <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">Solve Sudoku</button>
-        </form>
-
-        <div id="solution" class="alert alert-info mt-4">
-            <h5>Solution:</h5>
-            <pre id="solutionText"></pre>
         </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybB1T5PnXWuG4LRi3NIN2F4c+Yjq62P0xXyU8pZvnA0Txg6KzX" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0y0qSyuQFq7H61gqK5GsEApe5J4FJ5wD4n2aVK1HtR7X6wO5" crossorigin="anonymous"></script>
+    <!-- Resim Modalı -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" class="modal-img" alt="Büyük görüntü">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Validate input (only numbers between 1 and 9)
-        function validateInput(event) {
-            const input = event.target;
-            const value = input.value;
-            if (value && !/^[1-9]$/.test(value)) {
-                input.value = '';  // Clear invalid input
+        // Tema değiştirme fonksiyonu
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('i');
+
+        function toggleTheme() {
+            if (html.getAttribute('data-bs-theme') === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.classList.remove('bi-sun-fill');
+                icon.classList.add('bi-moon-fill');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                icon.classList.remove('bi-moon-fill');
+                icon.classList.add('bi-sun-fill');
+                localStorage.setItem('theme', 'dark');
             }
         }
 
-        // Handle form submission and display solution
-        const form = document.querySelector('#sudokuForm');
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(form);
-            fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Show the solution in the grid
-                const solution = data.solution;
-                for (let i = 0; i < 9; i++) {
-                    for (let j = 0; j < 9; j++) {
-                        const cell = document.getElementById(`cell_${i}_${j}`);
-                        cell.value = solution[i][j] !== 0 ? solution[i][j] : ''; // Fill only non-zero cells
-                        cell.disabled = true;  // Disable input in solved cells
-                    }
+        // Sayfa yüklendiğinde kaydedilmiş temayı uygula
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.setAttribute('data-bs-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                icon.classList.remove('bi-moon-fill');
+                icon.classList.add('bi-sun-fill');
+            }
+        });
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Sürükle-bırak özelliği
+        const dropZone = document.querySelector('.upload-area');
+        const fileInput = document.getElementById('sudoku-image');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('border', 'border-primary');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('border', 'border-primary');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+        }
+
+        // Modal gösterme fonksiyonu
+        function showImage(imageId, title) {
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            const modalImg = document.querySelector('#imageModal .modal-img');
+            const modalTitle = document.querySelector('#imageModal .modal-title');
+            
+            modalImg.src = document.getElementById(imageId).src;
+            modalTitle.textContent = title;
+            modal.show();
+        }
+
+        // Form gönderme işlemi
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('sudoku-image');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Lütfen bir dosya seçin');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('solution-container').style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Tüm aşama görüntülerini göster
+                    document.getElementById('kareler-image').src = `data:image/png;base64,${data.kareler}`;
+                    document.getElementById('kenarlar-image').src = `data:image/png;base64,${data.kenarlar}`;
+                    document.getElementById('solution-image').src = `data:image/png;base64,${data.sonuc}`;
+                    document.getElementById('solution-container').style.display = 'block';
+                } else {
+                    alert(data.error || 'Bir hata oluştu');
                 }
-                // Display solution as text
-                document.getElementById('solutionText').textContent = JSON.stringify(solution, null, 2);
-                document.getElementById('solution').style.display = 'block';  // Show solution section
-            })
-            .catch(error => {
-                alert('An error occurred: ' + error.message);
-            });
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
         });
     </script>
 </body>
-</html>
+</html> 
